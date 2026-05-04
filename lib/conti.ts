@@ -48,7 +48,7 @@ async function getBrowser(): Promise<Browser> {
   const browser = await puppeteer.launch({
     executablePath,
     // chromium.headless may return 'new' | 'shell' | boolean depending on version
-    headless: HEADLESS ? (chromium.headless as any) ?? true : false,
+    headless: HEADLESS,
     args: [
       ...chromium.args,
       "--no-sandbox",
