@@ -1,4 +1,5 @@
-import puppeteer, { Browser, Page, HTTPRequest } from "puppeteer";
+import puppeteer, { Browser, Page, HTTPRequest } from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
@@ -6,7 +7,10 @@ const CONTI_URL = process.env.CONTI_URL!;
 const USER = process.env.CONTI_USERNAME!;
 const PASS = process.env.CONTI_PASSWORD!;
 const HEADLESS = process.env.CONTI_HEADLESS !== "false";
-const DEBUG_DIR = path.join(process.cwd(), "tmp", "conti-debug");
+const DEBUG_DIR = "/tmp/conti-debug";
+
+// Required for Vercel: disable graphics mode to avoid GPU-related crashes
+chromium.setGraphicsMode = false;
 
 export interface ContiError {
   message: string;
@@ -35,20 +39,43 @@ declare global {
 }
 
 async function getBrowser(): Promise<Browser> {
+  // On Vercel, globals don't survive between cold starts, but we still
+  // cache within a single warm invocation to avoid re-launching Chromium.
   if (global._contiBrowser?.connected) return global._contiBrowser;
+
+  const executablePath = await chromium.executablePath();
+
   const browser = await puppeteer.launch({
-    headless: HEADLESS,
+    executablePath,
+    // chromium.headless may return 'new' | 'shell' | boolean depending on version
+    headless: HEADLESS ? (chromium.headless as any) ?? true : false,
     args: [
+      ...chromium.args,
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-blink-features=AutomationControlled",
       "--window-size=1366,900",
+      "--single-process",   // Required on Vercel — sandbox blocks fork()
+      "--no-zygote",        // Required on Vercel — no zygote process allowed
     ],
-    defaultViewport: { width: 1366, height: 900 },
+    // Use explicit viewport instead of chromium.defaultViewport (can be null)
+    defaultViewport: {
+      width: 1366,
+      height: 900,
+    },
+    ignoreHTTPSErrors: true,
   });
+
   global._contiBrowser = browser;
   global._contiPage = undefined;
+
+  // Clean up stale references if the browser crashes or is closed
+  browser.on("disconnected", () => {
+    global._contiBrowser = undefined;
+    global._contiPage = undefined;
+  });
+
   return browser;
 }
 
