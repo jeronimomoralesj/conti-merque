@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PasswordInput from "@/app/_components/PasswordInput";
 
@@ -9,6 +9,14 @@ const LOGO_URL =
 type Mode = "login" | "forgot";
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-white" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
   const [mode, setMode] = useState<Mode>("login");
