@@ -220,7 +220,7 @@ export default function HomePage() {
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ej. 295/80R22.5  o  2055516  o  HDR2"
+            placeholder="ej. 29580225"
             className="flex-1 rounded-xl bg-white border border-gray-300 px-4 py-3 outline-none focus:border-merq-orange focus:ring-1 focus:ring-merq-orange text-base text-gray-900 placeholder-gray-400"
           />
           <button
@@ -309,7 +309,6 @@ haveSearchResults:${String(debug.haveSearchResults ?? false)}`}
               <div className="rounded-xl border border-gray-200 overflow-hidden bg-white">
                 <div className="grid grid-cols-[140px_110px_1fr_140px_80px] gap-4 px-4 py-2 text-xs uppercase tracking-wide text-gray-500 bg-gray-50 border-b border-gray-200">
                   <div>Artículo</div>
-                  <div>Marca</div>
                   <div>Descripción</div>
                   <div className="text-right">Disponible</div>
                   <div className="text-right">Bodega</div>
@@ -328,7 +327,6 @@ haveSearchResults:${String(debug.haveSearchResults ?? false)}`}
                       <div className="font-mono text-sm text-gray-900">
                         {it.articleNum}
                       </div>
-                      <div className="text-sm text-gray-600">{it.brand}</div>
                       <div className="text-sm text-gray-800 break-words">
                         {it.description}
                       </div>
