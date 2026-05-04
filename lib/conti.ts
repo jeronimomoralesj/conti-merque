@@ -46,26 +46,24 @@ async function getBrowser(): Promise<Browser> {
   const executablePath = await chromium.executablePath();
 
   const browser = await puppeteer.launch({
-    executablePath,
-    // chromium.headless may return 'new' | 'shell' | boolean depending on version
-    headless: HEADLESS,
-    args: [
-      ...chromium.args,
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-blink-features=AutomationControlled",
-      "--window-size=1366,900",
-      "--single-process",   // Required on Vercel — sandbox blocks fork()
-      "--no-zygote",        // Required on Vercel — no zygote process allowed
-    ],
-    // Use explicit viewport instead of chromium.defaultViewport (can be null)
-    defaultViewport: {
-      width: 1366,
-      height: 900,
-    },
-    ignoreHTTPSErrors: true,
-  });
+  executablePath,
+  headless: HEADLESS ? true : false,
+  args: [
+    ...chromium.args,
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-blink-features=AutomationControlled",
+    "--window-size=1366,900",
+    "--single-process",
+    "--no-zygote",
+  ],
+  defaultViewport: {
+    width: 1366,
+    height: 900,
+  },
+  ignoreHTTPSErrors: true,
+} as any);
 
   global._contiBrowser = browser;
   global._contiPage = undefined;
